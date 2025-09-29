@@ -1,29 +1,29 @@
 Сервис и CLI для **кластеризации и авто-категоризации документов** (KMeans по эмбеддингам Sentence-Transformers), 
 получения **топ-термов** для каждого кластера (CT-TFIDF/YAKE/KeyBERT), а также **предсказания распределения вероятностей по кластерам** и 
-**zero-shot типа документа**. REST-API на FastAPI. :contentReference[oaicite:0]{index=0}
+**zero-shot типа документа**. REST-API на FastAPI. 
 
 API поддерживает загрузку **отдельных файлов**, **ZIP-архива**, а также работу по относительным путям в пределах базовой директории 
-(контролируется `DOCS_BASE`). Предусмотрены эндпоинты: `/fit`, `/predict`, `/classify`, `/doc_type`, `/health`. :contentReference[oaicite:1]{index=1}
+(контролируется `DOCS_BASE`). Предусмотрены эндпоинты: `/fit`, `/predict`, `/classify`, `/doc_type`, `/health`. 
 
 ---
 
 ## Основные возможности
 
 - **FIT (обучение/кластеризация)**: автоматический выбор *k* (силуэт), опциональный рекурсивный **recluster** крупных кластеров, 
-  пост-слияние мелких кластеров, генерация *categories.json*, *assignments.jsonl* и модели центроидов (*semantic_centroids.json*). :contentReference[oaicite:2]{index=2}  
+  пост-слияние мелких кластеров, генерация *categories.json*, *assignments.jsonl* и модели центроидов (*semantic_centroids.json*). 
 - **PREDICT**: для новых документов — метка кластера, **sim_to_centroid**, **scores** (softmax по косинусам), ключевые теги (YAKE/KeyBERT), 
-  **zero-shot тип документа** (по списку типов). :contentReference[oaicite:3]{index=3}
+  **zero-shot тип документа** (по списку типов). 
 - **REST-API**: эндпоинты `/fit`, `/predict`, `/classify` (прямое отнесение к переданным меткам: sim или NLI), `/doc_type` (готовый набор типов), `/health`. 
-  Поддержка загрузки `files[]`/`bundle` и чтения из `input_dir`/`paths`. Базовая директория ограничена переменной окружения `DOCS_BASE`. :contentReference[oaicite:4]{index=4}
+  Поддержка загрузки `files[]`/`bundle` и чтения из `input_dir`/`paths`. Базовая директория ограничена переменной окружения `DOCS_BASE`. 
 
 ---
 
 ## Структура
 
 - `auto_categorize.py` — CLI с режимами **fit/predict**; внутри чтение/очистка текста, эмбеддинги, KMeans, рекурсивный recluster, 
-  CT-TFIDF/YAKE/KeyBERT для лейблов и тегов, zero-shot типов документов, сохранение модели центроидов. :contentReference[oaicite:5]{index=5}  
+  CT-TFIDF/YAKE/KeyBERT для лейблов и тегов, zero-shot типов документов, сохранение модели центроидов. 
 - `app.py` — FastAPI-сервис: сбор входа (files/bundle/paths/input_dir), запуск `auto_categorize.py` как подпроцесса, 
-  типовые ответы и модели pydantic; есть служебные `/health`, универсальный `/classify` (sim/NLI). Путь ограничивается `DOCS_BASE` (по умолчанию `/data`). :contentReference[oaicite:6]{index=6}
+  типовые ответы и модели pydantic; есть служебные `/health`, универсальный `/classify` (sim/NLI). Путь ограничивается `DOCS_BASE` (по умолчанию `/data`). 
 
 ---
 
