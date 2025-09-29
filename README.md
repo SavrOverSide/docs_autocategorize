@@ -29,14 +29,11 @@ API поддерживает загрузку **отдельных файлов*
 
 ## Установка
 
-```bash
+
 python -m venv .venv
 source .venv/bin/activate       # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 Рекомендуемые зависимости (requirements.txt):
-
-scss
-Копировать код
 fastapi
 uvicorn[standard]
 numpy
@@ -51,8 +48,7 @@ pymorphy2      # опционально (лемматизация RU)
 Для sentence-transformers может понадобиться torch (CPU/GPU — установите подходящий билд).
 
 Запуск API
-bash
-Копировать код
+
 export DOCS_BASE=$PWD/data      # база, внутри которой можно читать/писать
 mkdir -p "$DOCS_BASE"
 uvicorn app:app --reload --port 8000
@@ -60,27 +56,21 @@ uvicorn app:app --reload --port 8000
 
 Примеры запросов (cURL)
 1) Обучение (кластеризация) — /fit
+   
 Загрузка одного файла:
-
-bash
-Копировать код
 curl -s -X POST "http://localhost:8000/fit" \
   -F "files=@Docs_test/1.txt" \
   -F "out_root=runs" \
   -F "device=cpu" | jq .
+  
 Загрузка ZIP:
-
-bash
-Копировать код
 curl -s -X POST "http://localhost:8000/fit" \
   -F "bundle=@Docs_test.zip" \
   -F "out_root=runs" \
   -F "predict_on_fit=true" \
   -F "prob_temperature=0.8" | jq .
+  
 Работа по каталогу внутри DOCS_BASE:
-
-bash
-Копировать код
 curl -s -X POST "http://localhost:8000/fit" \
   -F "input_dir=Docs_test" \
   -F "out_root=runs" \
@@ -90,8 +80,6 @@ curl -s -X POST "http://localhost:8000/fit" \
 2) Предсказание на новых документах — /predict
 С моделью из run_dir/models/semantic_centroids.json:
 
-bash
-Копировать код
 curl -s -X POST "http://localhost:8000/predict" \
   -F "input_dir=Docs_new" \
   -F "model_path=runs/<RUN_ID>/models/semantic_centroids.json" \
@@ -100,36 +88,32 @@ curl -s -X POST "http://localhost:8000/predict" \
 Можно передать модель файлом: -F "model=@semantic_centroids.json". В predictions.jsonl будут поля pred_label, sim_to_centroid, scores, tags, а также doc_type_pred/doc_type_scores если задан doc_types. auto_categorize
 
 3) Прямая классификация по меткам — /classify
+   
 SIM-бэкенд (эмбеддинги):
 
-bash
-Копировать код
 curl -s -X POST "http://localhost:8000/classify" \
   -F "input_dir=Docs_test" \
   -F 'labels_json=["Счёт","Договор","Заявление"]' \
   -F "backend=sim" | jq .
+  
 NLI-бэкенд (zero-shot):
 
-bash
-Копировать код
 curl -s -X POST "http://localhost:8000/classify" \
   -F "input_dir=Docs_test" \
   -F 'labels_json=["Счёт","Договор","Заявление"]' \
   -F "backend=nli" \
   -F "nli_model=MoritzLaurer/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7" | jq .
+  
 Каждый элемент содержит scores по меткам и pred_label/pred_prob. app
 
 4) Готовые типы документов — /doc_type
-bash
-Копировать код
 curl -s -X POST "http://localhost:8000/doc_type" \
   -F "input_dir=Docs_test" | jq .
 Если не передавать список типов, используется дефолтный набор на RU. app
 
 CLI без API (напрямую)
 Обучение (fit)
-bash
-Копировать код
+
 python auto_categorize.py fit Docs_test \
   --device cpu \
   --min-k 7 --max-k 12 --k-select-tol 0.25 \
@@ -143,18 +127,17 @@ python auto_categorize.py fit Docs_test \
   --save-model models/semantic_centroids.json \
   --predict-on-fit --predict-out predictions.jsonl \
   --prob-temperature 0.8 --doc-types "" --doc-types-temperature 0.7 --doc-types-out doc_types.txt
-auto_categorize
+  
 
 Предсказание (predict)
-bash
-Копировать код
+
 python auto_categorize.py predict Docs_new \
   --model models/semantic_centroids.json \
   --device cpu \
   --prob-temperature 1.0 \
   --doc-types "" --doc-types-temperature 0.7 \
   --out predictions.jsonl
-auto_categorize
+
 
 Переменные окружения
 DOCS_BASE — база разрешённых путей для API; все input_dir/paths нормализуются внутрь неё. По умолчанию /data.
@@ -171,11 +154,11 @@ COPY . .
 ENV DOCS_BASE=/data
 EXPOSE 8000
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
 Запуск:
 
-bash
-Копировать код
 docker build -t docsvc .
 docker run --rm -p 8000:8000 -e DOCS_BASE=/data -v $PWD/data:/data docsvc
+
 Лицензия
 MIT / Internal 
